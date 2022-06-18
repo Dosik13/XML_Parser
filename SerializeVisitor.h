@@ -6,8 +6,8 @@
 
 class SerializeVisitor : public Visitor {
 private:
-	std::ostream& mOut;
-	size_t mDepth;
+	std::ostream& out;
+	size_t depth;
 public:
 	SerializeVisitor(std::ostream& outStream);
 
