@@ -2,7 +2,7 @@
 
 void XmlNode::free()
 {
-	children.clear();
+	childrens.clear();
 }
 
 XmlNode::~XmlNode()
@@ -10,8 +10,9 @@ XmlNode::~XmlNode()
 	free();
 }
 
-XmlNode* XmlNode::XmlReader(const std::string& content, size_t& i)
+XmlNode* XmlNode::XmlReader(const std::string& content, size_t& i, size_t level)
 {
+    std::cout << level << "REKURSIQ!!!\n";
     bool flag = false;
     std::string info = "";
     if (content[i++] == '<')
@@ -25,32 +26,37 @@ XmlNode* XmlNode::XmlReader(const std::string& content, size_t& i)
         if (content[i] == '>')
         {
             i++;
-            tag = info;
-            std::cout << "TAG: " << info << "\n";
+            this->tag = info;
+            std::cout << "Tag: " << tag << '\n';
             info = "";
         }
-        else if (content[i++] == ' ')
+        if (content[i] == ' ')
         {
-            tag = info;
-            std::cout << "TAG+: " << info << "\n";
+            i++;
+            this->tag = info;
+            std::cout << "Tag: " << tag << '\n';
             info = "";
             while (content[i] != '=')
             {
                 info += content[i++];
             }
             i++;
-            std::cout << "AttributeName: " << info << "\n";
-            attributes.setKey(info);
+          
+            this->attributes.setKey(info);
+            std::cout << "Key: " << attributes.getKey() << '\n';
             info = "";
             while (content[i] != '>')
             {
+                //if (content[i] == ' ') break;
                 info += content[i++];
             }
-            std::cout << "AttributeValue: " << info << "\n";
-            attributes.setValue(info);
-            info = "";
+            this->attributes.setValue(info);
+            std::cout << "Value: " << attributes.getValue() << '\n';
+            info = "";     
             i++;
         }
+        std::cout << "Key: " << attributes.getKey() << '\n';
+        std::cout << "Value: " << attributes.getValue() << '\n';
 
         if (content[i] != '<')
         {
@@ -59,46 +65,54 @@ XmlNode* XmlNode::XmlReader(const std::string& content, size_t& i)
                 info += content[i++];
             }
             flag = true;
-            std::cout << "TEXT: " << info << "\n";
-            text = info;
+            this->text = info;
+            std::cout << "Text: " << text << '\n';
             info = "";
         }
         if (content[i] == '<')
         {
-            if (flag == true)
+            while (content[i + 1] != '/')
+            {
+                XmlNode* child = new XmlNode;
+                childrens.push_back(child->XmlReader(content, i, level + 1));
+            }
+            if (content[i + 1] == '/' && flag == true)
             {
                 while (content[i] != '>') i++;
+                i++;
                 return this;
             }
-            while (content[i + 1] != '/') children.push_back(XmlReader(content, i));
-            while (content[i] != '>') i++;
-            return this;
+            if (content[i + 1] == '/')
+            {
+                while (content[i] != '>') i++;
+                i++;
+                return this;
+            }
         }
-        
     }
 }
 
 
-size_t XmlNode::getChildrenSize() const
-{
-	return children.size();
-}
+//size_t XmlNode::getChildrensSize() const
+//{
+//	return childrens.size();
+//}
 
 XmlNode* XmlNode::searchID(const std::string& id) const
 {
-    for (size_t i = 0; i < children.size(); i++)
+    /*for (size_t i = 0; i < childrens.size(); i++)
     {
-        if (id == children[i]->attributes.getValue()) return children[i];
-    }
-
+        if (id == childrens[i]->attributes.getValue()) return childrens[i];
+    }*/
+    std::cout << childrens.size();
     return nullptr;
 }
 
 XmlNode* XmlNode::searchKey(const std::string& key) const
 {
-    for (size_t i = 0; i < children.size(); i++)
+    for (size_t i = 0; i < childrens.size(); i++)
     {
-        if (children[i]->attributes.getKey() == key) return children[i];
+        if (childrens[i]->attributes.getKey() == key) return childrens[i];
     }
     
     return nullptr;
@@ -127,6 +141,16 @@ void XmlNode::set(const std::string& id, const std::string& key, const std::stri
 {
     XmlNode* ptr = select(id, key);
     ptr->attributes.setValue(value);
+}
+
+void XmlNode::children(const std::string& id) const
+{
+    XmlNode* element = searchID(id);
+    for (size_t i = 0; i < element->childrens.size(); i++) // Cycles through all childrens
+    {
+        std::cout << element->childrens[i]->attributes.getKey() << " " << element[i].attributes.getValue() << "\n";
+        std::cout << '\n';
+    }
 }
 
 

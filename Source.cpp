@@ -12,9 +12,10 @@ int main()
 	std::string result;
 	result = FileParser::fileParser(file);
 	XmlNode xml;
+	XmlNode* ptr;
 	size_t i = 0;
-	xml.XmlReader(result, i);
-	std::cout << xml.getChildrenSize();
+	xml.XmlReader(result, i, 0);
+	ptr = xml.searchID("0");
 
 	return 0;
 }
