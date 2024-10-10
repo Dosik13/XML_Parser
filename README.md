@@ -1,2 +1,2 @@
 # XML_Parser
-Проектът НЕ работи!
+Unfinished XML parser
